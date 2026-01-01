@@ -1,0 +1,5 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import "tailwindcss";
+/* Asegúrate de que no haya estilos que fuercen fuentes antiguas aquí */
