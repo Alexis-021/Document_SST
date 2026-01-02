@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <div className="h-1.5 w-1.5 rounded-full bg-[#8dc63f] animate-pulse" />
                   <span>Gestión de Documentos SST</span>
                   <span className="text-slate-300">|</span>
-                  <span>Versión 1.0.2</span>
+                  <span>Versión 1.0.3</span>
                 </div>
               </div>
 
