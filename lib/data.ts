@@ -13,7 +13,7 @@ export const DATA_SEDES: Record<string, any> = {
         archivos: [
           { id: 1, nombre: "Matriz IPERC - Planta de Extracción.pdf", tamano: "1.2 MB", fecha: "10/01/2025", categoria: "Matriz IPERC" },
           { id: 2, nombre: "Política de Seguridad y Salud.docx", tamano: "2.4 MB", fecha: "05/01/2025", categoria: "Políticas" },
-          { id: 3, nombre: "Procedimiento de Trabajo en Altura", tamano: "4.1 MB", fecha: "01/01/2025", categoria: "Procedimientos" },
+          { id: 3, nombre: "Procedimiento de Trabajo en Altura.xlsx", tamano: "4.1 MB", fecha: "01/01/2025", categoria: "Procedimientos" },
           { id: 4, nombre: "Instructivo de Uso de Arnés", tamano: "850 KB", fecha: "15/01/2025", categoria: "Instructivos" },
           { id: 5, nombre: "Formato de Permiso de Trabajo (PETAR)", tamano: "500 KB", fecha: "18/01/2025", categoria: "Formatos" },
           { id: 6, nombre: "Registro de Entrega de EPP", tamano: "1.1 MB", fecha: "20/01/2025", categoria: "Registros" },
