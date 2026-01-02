@@ -1,6 +1,7 @@
 import "./globals.css"; 
 import { Inter } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react"; // 1. Importación necesaria
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next"; // Nueva importación
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,10 +20,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           {/* FOOTER CORPORATIVO CON LOGO AL BORDE DE LA PANTALLA */}
           <footer className="shrink-0 bg-white border-t border-slate-200 py-6 z-50">
-            {/* Contenedor principal sin límite de ancho para el logo */}
             <div className="w-full px-6 relative flex items-center justify-center min-h-[40px]">
               
-              {/* LOGO: Posicionado absolutamente al inicio (borde de la pantalla) */}
+              {/* LOGO */}
               <div className="absolute left-6">
                 <img 
                   src="/logo-grupo-palmas.png" 
@@ -31,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 />
               </div>
 
-              {/* BLOQUE CENTRAL: Limitado a max-w-7xl para alinearse con el contenido superior */}
+              {/* BLOQUE CENTRAL */}
               <div className="max-w-7xl mx-auto text-center">
                 <p className="text-slate-500 text-sm font-medium mb-1">
                   © {new Date().getFullYear()} <span className="text-[#8dc63f] font-bold">TI - Grupo Palmas</span>. Todos los derechos reservados.
@@ -49,8 +49,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </footer>
         </div>
         
-        {/* 2. Componente de Analíticas inyectado antes del cierre del body */}
-        <Analytics /> 
+        {/* Componentes de monitoreo de Vercel */}
+        <Analytics />
+        <SpeedInsights /> 
       </body>
     </html>
   );
