@@ -10,14 +10,13 @@ export default async function SedePage({
   const { sedeId } = await params;
   const sedeData = DATA_SEDES[sedeId];
 
-  if (!sedeData) return <div className="p-20 text-center">Sede no encontrada</div>;
+  if (!sedeData) return <div className="p-20 text-center font-bold text-slate-500">Sede no encontrada</div>;
 
   return (
-    /* h-full y flex-col para que el logo se mantenga abajo sin forzar scroll */
-    <div className="flex flex-col items-center w-full min-h-full pt-12 md:pt-16 pb-10 bg-[#f8fafc] font-sans antialiased">
+    <div className="flex flex-col items-center w-full min-h-full pt-12 md:pt-16 pb-12 bg-[#f8fafc] font-sans antialiased">
       
-      {/* Navegación Breadcrumbs con estilo institucional */}
-      <nav className="flex items-center gap-x-2 text-[11px] md:text-xs font-medium mb-12 w-full max-w-6xl px-4">
+      {/* Navegación Breadcrumbs */}
+      <nav className="flex items-center gap-x-2 text-[11px] md:text-xs font-medium mb-12 w-full max-w-6xl px-10">
         <Link 
           href="/" 
           className="flex items-center gap-1 text-slate-400 hover:text-[#8dc63f] transition-all cursor-pointer"
@@ -32,6 +31,7 @@ export default async function SedePage({
         </span>
       </nav>
 
+      {/* Título de Sede */}
       <div className="text-center mb-16 px-4">
         <h1 className="text-[40px] md:text-[48px] font-bold text-[#1e293b] leading-tight mb-4">
           {sedeData.nombre}
@@ -41,42 +41,36 @@ export default async function SedePage({
         </p>
       </div>
 
-      {/* Grid de Áreas con iconos reactivos y verde institucional */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl w-full px-4 md:px-10">
-        {sedeData.areas.map((area: any) => (
-          <Link 
-            key={area.nombre} 
-            href={`/documents/${sedeId}/${area.nombre.toLowerCase().replace(/ /g, "-")}`}
-            className="group"
-          >
-            <div className="bg-white border border-slate-100 rounded-[24px] p-6 flex items-center gap-x-5 shadow-sm hover:shadow-xl hover:border-[#8dc63f] transition-all duration-300 cursor-pointer h-full">
-              
-              {/* Icono reactivo: Cambia a verde sólido al pasar el mouse */}
-              <div className="p-4 bg-slate-50 text-slate-400 rounded-[20px] group-hover:bg-[#8dc63f] group-hover:text-white transition-all duration-300 shadow-inner">
-                <area.icono className="h-7 w-7" />
-              </div>
-
-              <div className="flex flex-col">
-                <span className="text-xl font-bold text-[#1e293b] group-hover:text-[#8dc63f] transition-colors">
-                  {area.nombre}
-                </span>
+      {/* GRID DE ÁREAS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl w-full px-10 mx-auto">
+        {sedeData.areas.map((area: any) => {
+          const IconoArea = area.icono; 
+          
+          return (
+            <Link 
+              key={area.nombre} 
+              href={`/documents/${sedeId}/${area.nombre.toLowerCase().replace(/ /g, "-")}`}
+              className="block h-full group"
+            >
+              <div className="bg-white border border-slate-100 rounded-[24px] p-6 flex items-center gap-x-5 shadow-sm hover:shadow-xl hover:border-[#8dc63f] transition-all duration-300 cursor-pointer h-full">
                 
-                <span className="text-sm text-slate-400 font-medium">
-                  {area.archivos.length} {area.archivos.length === 1 ? 'documento' : 'documentos'}
-                </span>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+                <div className="p-4 bg-slate-50 text-slate-400 rounded-[20px] group-hover:bg-[#8dc63f] group-hover:text-white transition-all duration-300 shadow-inner">
+                  {IconoArea && <IconoArea className="h-7 w-7" />}
+                </div>
 
-      {/* LOGO CORPORATIVO AL FINAL (COHERENCIA CON HOME) */}
-      <div className="mt-auto pt-20 flex justify-center w-full">
-        <img 
-          src="/logo-grupo-palmas.png" 
-          alt="Grupo Palmas" 
-          className="h-16 md:h-20 w-auto object-contain" 
-        />
+                <div className="flex flex-col">
+                  <span className="text-xl font-bold text-[#1e293b] group-hover:text-[#8dc63f] transition-colors">
+                    {area.nombre}
+                  </span>
+                  
+                  <span className="text-sm text-slate-400 font-medium">
+                    {area.archivos.length} {area.archivos.length === 1 ? 'documento' : 'documentos'}
+                  </span>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
