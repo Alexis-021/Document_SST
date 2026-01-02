@@ -16,7 +16,6 @@ export default function DocumentModalPage({
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const [baseUrl, setBaseUrl] = useState("");
 
-  // 1. Detectar dispositivo y obtener la URL base
   useEffect(() => {
     setBaseUrl(window.location.origin);
     const detectDevice = () => {
@@ -41,21 +40,18 @@ export default function DocumentModalPage({
   const rutaArchivoLocal = `/docs/${nombreArchivo}`;
   const esPDF = nombreArchivo.toLowerCase().endsWith('.pdf');
   
-  // URL absoluta para el visor de Microsoft Office Online
   const urlPublicaCompleta = `${baseUrl}${rutaArchivoLocal}`;
   const urlOfficeViewer = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(urlPublicaCompleta)}`;
 
-  // MEJORA: Función de cierre forzado para evitar problemas de historial con iFrames
+  // SOLUCIÓN: Usamos replace para limpiar la entrada del historial al cerrar
   const handleClose = () => {
-    // Usamos push a la ruta padre para cerrar el modal de forma limpia al primer clic
-    router.push(`/documents/${sedeId}/${areaId}`);
+    router.replace(`/documents/${sedeId}/${areaId}`);
   };
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-0 md:p-6">
       <div className="bg-[#f3f3f3] w-full h-full md:max-h-[98vh] md:rounded-xl overflow-hidden flex flex-col shadow-2xl animate-in fade-in duration-200">
         
-        {/* Cabecera Adaptativa */}
         <header className="bg-white border-b border-slate-200 px-4 md:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-x-3">
             <div className="bg-blue-50 p-2 rounded-lg hidden md:block">
@@ -78,7 +74,6 @@ export default function DocumentModalPage({
             <a href={rutaArchivoLocal} download className="p-2.5 bg-slate-100 rounded-xl md:px-4 md:py-2 md:text-xs font-bold flex items-center gap-x-2 text-slate-700 hover:bg-slate-200 transition-colors">
               <Download className="h-4 w-4" /> <span className="hidden md:inline">Descargar</span>
             </a>
-            {/* Botón de cierre actualizado */}
             <button 
               onClick={handleClose} 
               className="p-2.5 hover:bg-red-50 rounded-xl text-slate-400 transition-colors"
@@ -88,7 +83,6 @@ export default function DocumentModalPage({
           </div>
         </header>
 
-        {/* CONTENEDOR DINÁMICO */}
         <div className="flex-1 bg-[#525659] relative overflow-hidden">
           {isMobile === null ? (
             <div className="h-full flex items-center justify-center text-white">Cargando visor...</div>
@@ -117,7 +111,6 @@ export default function DocumentModalPage({
               </object>
             )
           ) : (
-            /* LÓGICA PARA WORD / EXCEL (OFFICE ONLINE) */
             <div className="w-full h-full bg-white">
               <iframe 
                 src={urlOfficeViewer}

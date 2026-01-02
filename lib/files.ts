@@ -1,32 +1,43 @@
-// lib/files.ts
 import fs from 'fs';
 import path from 'path';
 
 export function getFileMetadata(fileName: string) {
   try {
-    // Construimos la ruta absoluta hacia la carpeta public/docs
-    const filePath = path.join(process.cwd(), 'public', 'docs', fileName);
-    
-    // Obtenemos las estadísticas del archivo
+    const docsDir = path.join(process.cwd(), 'public', 'docs');
+    let filePath = path.join(docsDir, fileName);
+
+    // Si el archivo no existe, probamos añadiendo extensiones comunes
+    if (!fs.existsSync(filePath)) {
+      const extensions = ['.pdf', '.docx', '.xlsx', '.png', '.jpg'];
+      const foundExt = extensions.find(ext => fs.existsSync(`${filePath}${ext}`));
+      
+      if (foundExt) {
+        filePath = `${filePath}${foundExt}`;
+      } else {
+        // Si no existe de ninguna forma, retornamos valores por defecto sin romper la app
+        return { size: "---", date: "N/A" };
+      }
+    }
+
     const stats = fs.statSync(filePath);
 
-    // Convertimos bytes a MB o KB
+    // Formateo de Peso (MB o KB)
     const sizeInBytes = stats.size;
     const sizeFormatted = sizeInBytes > 1024 * 1024 
-      ? `${(sizeInBytes / (1024 * 1024)).toFixed(2)} MB`
-      : `${(sizeInBytes / 1024).toFixed(2)} KB`;
+      ? `${(sizeInBytes / (1024 * 1024)).toFixed(1)} MB`
+      : `${(sizeInBytes / 1024).toFixed(0)} KB`;
 
     return {
       size: sizeFormatted,
-      // birthtime es la fecha de creación, mtime es la última modificación
-      date: stats.mtime.toLocaleDateString('es-ES', {
+      // Usamos mtime (última modificación) para la fecha real de carga
+      date: stats.mtime.toLocaleDateString('es-PE', {
         day: '2-digit',
-        month: 'short',
+        month: '2-digit',
         year: 'numeric'
       })
     };
   } catch (error) {
-    console.error("Error leyendo metadata:", error);
-    return { size: "0 KB", date: "N/A" };
+    // Evitamos que el error detenga el servidor, devolviendo valores neutros
+    return { size: "---", date: "N/A" };
   }
 }

@@ -1,5 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "tailwindcss";
-/* Asegúrate de que no haya estilos que fuercen fuentes antiguas aquí */
+
+/* Forzamos que el navegador no pueda crear scroll lateral bajo ninguna circunstancia */
+html, body {
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important; /* Mata la flecha roja definitivamente */
+  background-color: #f8fafc;
+}
+
+/* Permitir scroll solo dentro del contenedor de contenido */
+.scroll-container {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}

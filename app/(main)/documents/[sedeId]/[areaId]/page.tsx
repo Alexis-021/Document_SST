@@ -16,13 +16,14 @@ export default async function AreaPage({
 
   if (!areaData) return <div className="p-20 text-center">Área no encontrada</div>;
 
-  // Procesamos la metadata antes de enviarla al cliente
+  // Inyectamos la metadata real asegurando que los nombres de las propiedades
+  // coincidan con lo que AreaClientPage consume (peso y fecha).
   const archivosConMetadata = areaData.archivos.map((doc: any) => {
     const meta = getFileMetadata(doc.nombre);
     return {
       ...doc,
-      fecha: meta.date,
-      tamano: meta.size
+      fecha: meta.date, // Coincide con doc.fecha en el cliente
+      peso: meta.size    // Coincide con doc.peso en el cliente
     };
   });
 

@@ -1,5 +1,6 @@
 import { DATA_SEDES } from "@/lib/data";
 import Link from "next/link";
+import { ChevronRight, Home } from "lucide-react";
 
 export default async function SedePage({ 
   params 
@@ -12,47 +13,70 @@ export default async function SedePage({
   if (!sedeData) return <div className="p-20 text-center">Sede no encontrada</div>;
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-8 md:p-16">
-      {/* Navegación Breadcrumbs */}
-      <nav className="flex items-center gap-x-2 text-sm text-slate-400 mb-12">
-        <Link href="/" className="hover:text-slate-600 transition-colors">Sedes</Link>
-        <span>&gt;</span>
-        <span className="font-medium text-slate-600">{sedeData.nombre}</span>
+    /* h-full y flex-col para que el logo se mantenga abajo sin forzar scroll */
+    <div className="flex flex-col items-center w-full min-h-full pt-12 md:pt-16 pb-10 bg-[#f8fafc] font-sans antialiased">
+      
+      {/* Navegación Breadcrumbs con estilo institucional */}
+      <nav className="flex items-center gap-x-2 text-[11px] md:text-xs font-medium mb-12 w-full max-w-6xl px-4">
+        <Link 
+          href="/" 
+          className="flex items-center gap-1 text-slate-400 hover:text-[#8dc63f] transition-all cursor-pointer"
+        >
+          <Home className="h-3.5 w-3.5" />
+          <span>Sedes</span>
+        </Link>
+        <ChevronRight className="h-3 w-3 text-slate-300" />
+        <span className="bg-[#8dc63f]/10 text-[#8dc63f] px-2.5 py-1 rounded-md font-bold flex items-center gap-1 border border-[#8dc63f]/20">
+          <div className="h-1 w-1 rounded-full bg-[#8dc63f]" />
+          {sedeData.nombre}
+        </span>
       </nav>
 
-      <div className="text-center mb-16">
-        <h1 className="text-[44px] font-bold text-[#1e293b] mb-3">{sedeData.nombre}</h1>
-        <p className="text-slate-400 text-lg">Seleccione un área para ver los documentos</p>
+      <div className="text-center mb-16 px-4">
+        <h1 className="text-[40px] md:text-[48px] font-bold text-[#1e293b] leading-tight mb-4">
+          {sedeData.nombre}
+        </h1>
+        <p className="text-[#64748b] text-xl font-light">
+          Seleccione un área para acceder a la documentación oficial
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      {/* Grid de Áreas con iconos reactivos y verde institucional */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl w-full px-4 md:px-10">
         {sedeData.areas.map((area: any) => (
           <Link 
             key={area.nombre} 
-            // Esto crea la URL limpia: /documents/palmas-del-espino/sst
             href={`/documents/${sedeId}/${area.nombre.toLowerCase().replace(/ /g, "-")}`}
             className="group"
           >
-            <div className="bg-white border border-slate-100 rounded-[20px] p-8 flex items-center gap-x-6 hover:shadow-xl hover:shadow-blue-50/50 transition-all duration-300 cursor-pointer h-full">
-              <div className="p-4 bg-blue-50 text-blue-500 rounded-2xl group-hover:bg-blue-500 group-hover:text-white transition-all duration-300">
-                <area.icono className="h-6 w-6" />
+            <div className="bg-white border border-slate-100 rounded-[24px] p-6 flex items-center gap-x-5 shadow-sm hover:shadow-xl hover:border-[#8dc63f] transition-all duration-300 cursor-pointer h-full">
+              
+              {/* Icono reactivo: Cambia a verde sólido al pasar el mouse */}
+              <div className="p-4 bg-slate-50 text-slate-400 rounded-[20px] group-hover:bg-[#8dc63f] group-hover:text-white transition-all duration-300 shadow-inner">
+                <area.icono className="h-7 w-7" />
               </div>
 
               <div className="flex flex-col">
-                <span className="text-xl font-bold text-[#334155] group-hover:text-blue-600 transition-colors">
+                <span className="text-xl font-bold text-[#1e293b] group-hover:text-[#8dc63f] transition-colors">
                   {area.nombre}
                 </span>
                 
-                {/* --- AQUÍ ESTÁ EL CAMBIO DINÁMICO --- */}
-                <span className="text-sm text-slate-400">
+                <span className="text-sm text-slate-400 font-medium">
                   {area.archivos.length} {area.archivos.length === 1 ? 'documento' : 'documentos'}
                 </span>
-                {/* ------------------------------------ */}
-                
               </div>
             </div>
           </Link>
         ))}
+      </div>
+
+      {/* LOGO CORPORATIVO AL FINAL (COHERENCIA CON HOME) */}
+      <div className="mt-auto pt-20 flex justify-center w-full">
+        <img 
+          src="/logo-grupo-palmas.png" 
+          alt="Grupo Palmas" 
+          className="h-16 md:h-20 w-auto object-contain" 
+        />
       </div>
     </div>
   );

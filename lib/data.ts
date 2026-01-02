@@ -122,5 +122,5 @@ export const DATA_SEDES: Record<string, any> = {
         ] 
       }
     ]
-  }
+  },
 };
