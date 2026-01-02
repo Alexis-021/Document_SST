@@ -12,7 +12,7 @@ export default function Home() {
       {/* Encabezado: Margen reducido de mb-12 a mb-8 */}
       <div className="text-center mb-8 px-4">
         <h1 className="text-[36px] md:text-[44px] font-bold text-[#1e293b] leading-tight mb-2">
-          Gestión Documental SST
+          Gestión de Documentos SST
         </h1>
         <p className="text-[#64748b] text-lg md:text-xl font-light">
           Seleccione una sede para acceder a la documentación corporativa

@@ -17,7 +17,9 @@ export default function DocumentModalPage({
   const [baseUrl, setBaseUrl] = useState("");
 
   useEffect(() => {
+    // Captura el origen actual (localhost o dominio de Vercel)
     setBaseUrl(window.location.origin);
+    
     const detectDevice = () => {
       const ua = navigator.userAgent.toLowerCase();
       const mobileKeywords = [/android/, /iphone/, /ipad/, /ipod/, /blackberry/, /windows phone/];
@@ -30,9 +32,16 @@ export default function DocumentModalPage({
     return () => window.removeEventListener('resize', detectDevice);
   }, []);
 
-  const docData = DATA_SEDES[sedeId]?.areas
-    .find((a: any) => a.nombre.toLowerCase().replace(/ /g, "-") === areaId)
-    ?.archivos.find((d: any) => d.id.toString() === documentId);
+  // Normalización para encontrar el área aunque la URL tenga guiones o no tenga tildes
+  const sede = DATA_SEDES[sedeId];
+  const area = sede?.areas.find((a: any) => {
+    const nombreNormalizado = a.nombre.toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, "-");
+    return nombreNormalizado === areaId;
+  });
+
+  const docData = area?.archivos.find((d: any) => d.id.toString() === documentId);
 
   if (!docData) return null;
 
@@ -40,10 +49,10 @@ export default function DocumentModalPage({
   const rutaArchivoLocal = `/docs/${nombreArchivo}`;
   const esPDF = nombreArchivo.toLowerCase().endsWith('.pdf');
   
+  // URL completa necesaria para que Microsoft Office Online pueda "halar" el archivo
   const urlPublicaCompleta = `${baseUrl}${rutaArchivoLocal}`;
-  const urlOfficeViewer = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(urlPublicaCompleta)}`;
+  const urlOfficeViewer = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(urlPublicaCompleta)}`;
 
-  // SOLUCIÓN: Usamos replace para limpiar la entrada del historial al cerrar
   const handleClose = () => {
     router.replace(`/documents/${sedeId}/${areaId}`);
   };
@@ -55,7 +64,7 @@ export default function DocumentModalPage({
         <header className="bg-white border-b border-slate-200 px-4 md:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-x-3">
             <div className="bg-blue-50 p-2 rounded-lg hidden md:block">
-              {esPDF ? <FileText className="h-4 w-4 text-red-600" /> : <FileCode className="h-4 w-4 text-blue-600" />}
+              {esPDF ? <FileText className="h-4 w-4 text-red-600" /> : <FileCode className="h-4 w-4 text-green-600" />}
             </div>
             <div>
               <h2 className="text-sm font-bold text-slate-700 truncate max-w-[180px] md:max-w-md">
@@ -63,7 +72,7 @@ export default function DocumentModalPage({
               </h2>
               <div className="flex items-center gap-x-2">
                 <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">
-                  {esPDF ? (isMobile ? 'Modo Lectura Táctil' : 'Modo Escritorio Adobe') : 'Visor Office Online'}
+                  {esPDF ? (isMobile ? 'Modo Lectura Táctil' : 'Lector PDF Nativo') : 'Visor Office Online'}
                 </span>
                 {isMobile ? <Smartphone className="h-2.5 w-2.5 text-blue-500" /> : <Monitor className="h-2.5 w-2.5 text-green-500" />}
               </div>
@@ -85,7 +94,7 @@ export default function DocumentModalPage({
 
         <div className="flex-1 bg-[#525659] relative overflow-hidden">
           {isMobile === null ? (
-            <div className="h-full flex items-center justify-center text-white">Cargando visor...</div>
+            <div className="h-full flex items-center justify-center text-white">Preparando visor...</div>
           ) : esPDF ? (
             isMobile ? (
               <div className="h-full bg-white overflow-y-auto">
@@ -96,19 +105,11 @@ export default function DocumentModalPage({
                   config={{
                     header: { disableHeader: true },
                     pdfVerticalScrollByDefault: true,
-                    pdfZoom: { defaultZoom: 0.8, zoomJump: 0.1 }
                   }}
                 />
               </div>
             ) : (
-              <object
-                data={`${rutaArchivoLocal}#toolbar=1&navpanes=1&view=FitH`}
-                type="application/pdf"
-                width="100%"
-                height="100%"
-              >
-                <iframe src={rutaArchivoLocal} className="w-full h-full border-none" />
-              </object>
+              <iframe src={rutaArchivoLocal} className="w-full h-full border-none bg-white" />
             )
           ) : (
             <div className="w-full h-full bg-white">
@@ -116,11 +117,10 @@ export default function DocumentModalPage({
                 src={urlOfficeViewer}
                 width="100%"
                 height="100%"
-                frameBorder="0"
-                className="w-full h-full"
+                className="w-full h-full border-none"
                 title="Office Document Viewer"
               >
-                No se puede previsualizar el documento. <a href={rutaArchivoLocal}>Descargar archivo</a>.
+                Tu navegador no soporta iframes. <a href={rutaArchivoLocal}>Descargar archivo</a>.
               </iframe>
             </div>
           )}

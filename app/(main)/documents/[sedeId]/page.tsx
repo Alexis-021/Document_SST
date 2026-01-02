@@ -12,10 +12,19 @@ export default async function SedePage({
 
   if (!sedeData) return <div className="p-20 text-center font-bold text-slate-500">Sede no encontrada</div>;
 
+  // FUNCIÓN DE NORMALIZACIÓN: Limpia tildes y espacios para la URL
+  const normalizarParaUrl = (texto: string) => 
+    texto
+      .toLowerCase()
+      .normalize("NFD")               
+      .replace(/[\u0300-\u036f]/g, "") 
+      .replace(/ /g, "-");             
+
   return (
+    /* Restaurado items-center y max-w-6xl para diseño centrado */
     <div className="flex flex-col items-center w-full min-h-full pt-12 md:pt-16 pb-12 bg-[#f8fafc] font-sans antialiased">
       
-      {/* Navegación Breadcrumbs */}
+      {/* Navegación Breadcrumbs centrada */}
       <nav className="flex items-center gap-x-2 text-[11px] md:text-xs font-medium mb-12 w-full max-w-6xl px-10">
         <Link 
           href="/" 
@@ -31,7 +40,7 @@ export default async function SedePage({
         </span>
       </nav>
 
-      {/* Título de Sede */}
+      {/* Título de Sede centrado */}
       <div className="text-center mb-16 px-4">
         <h1 className="text-[40px] md:text-[48px] font-bold text-[#1e293b] leading-tight mb-4">
           {sedeData.nombre}
@@ -41,15 +50,17 @@ export default async function SedePage({
         </p>
       </div>
 
-      {/* GRID DE ÁREAS */}
+      {/* GRID DE ÁREAS centrado */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl w-full px-10 mx-auto">
         {sedeData.areas.map((area: any) => {
           const IconoArea = area.icono; 
+          // Aplicamos la normalización aquí para el Link
+          const areaSlug = normalizarParaUrl(area.nombre);
           
           return (
             <Link 
               key={area.nombre} 
-              href={`/documents/${sedeId}/${area.nombre.toLowerCase().replace(/ /g, "-")}`}
+              href={`/documents/${sedeId}/${areaSlug}`}
               className="block h-full group"
             >
               <div className="bg-white border border-slate-100 rounded-[24px] p-6 flex items-center gap-x-5 shadow-sm hover:shadow-xl hover:border-[#8dc63f] transition-all duration-300 cursor-pointer h-full">

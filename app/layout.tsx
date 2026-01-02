@@ -38,9 +38,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 
                 <div className="flex items-center justify-center gap-x-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   <div className="h-1.5 w-1.5 rounded-full bg-[#8dc63f] animate-pulse" />
-                  <span>Gestión Documental SST</span>
+                  <span>Gestión de Documentos SST</span>
                   <span className="text-slate-300">|</span>
-                  <span>Versión 1.0.1</span>
+                  <span>Versión 1.0.2</span>
                 </div>
               </div>
 

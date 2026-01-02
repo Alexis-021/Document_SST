@@ -11,7 +11,7 @@ export default function AreaClientPage({ sedeId, areaId, areaNombre, archivos }:
   const [activeFilter, setActiveFilter] = useState("Todos");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filtros = ["Todos", "Procedimientos", "Matriz IPERC", "Políticas", "Instructivos", "Formatos", "Registros"];
+  const filtros = ["Todos", "Procedimientos", "Matriz IPERC", "Políticas", "Instructivos", "Formatos", "Registros","Reglamentos"];
   const sedeNombreFormateado = sedeId.replace(/-/g, ' ');
 
   const counts = useMemo(() => {
