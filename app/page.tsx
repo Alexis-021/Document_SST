@@ -6,7 +6,6 @@ export default function Home() {
   const sedesIds = Object.keys(DATA_SEDES);
 
   return (
-    /* h-full y flex-col aseguran que el logo se vaya al fondo sin scroll */
     <div className="flex flex-col items-center w-full min-h-full pt-12 md:pt-16 pb-10 bg-[#f8fafc] font-sans antialiased">
       
       {/* Encabezado */}
@@ -19,23 +18,29 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Grid de Sedes */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-[1200px] w-full px-10">
+      {/* Grid de Sedes: Se agregó 'mx-auto' y se ajustó el responsive para Vercel */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-[1200px] w-full px-10 mx-auto">
         {sedesIds.map((id) => {
           const sede = DATA_SEDES[id];
           return (
-            <Link href={`/documents/${id}`} key={id}>
-              <div className="bg-white border border-slate-100 rounded-[24px] p-10 flex flex-col items-center shadow-sm hover:shadow-xl hover:border-[#8dc63f]/40 transition-all duration-300 cursor-pointer group h-full">
-                <div className="mb-8 p-6 bg-[#8dc63f] text-white rounded-[22px] shadow-lg shadow-blue-100 group-hover:scale-105 transition-transform">
+            <Link href={`/documents/${id}`} key={id} className="block h-full">
+              {/* Ajuste de borde: se eliminó la transparencia /40 para evitar el color púrpura por defecto del navegador */}
+              <div className="bg-white border border-slate-100 rounded-[24px] p-10 flex flex-col items-center shadow-sm hover:shadow-xl hover:border-[#8dc63f] transition-all duration-300 cursor-pointer group h-full">
+                
+                {/* Icono reactivo con sombra institucional */}
+                <div className="mb-8 p-6 bg-[#8dc63f] text-white rounded-[22px] shadow-lg shadow-[#8dc63f]/20 group-hover:scale-105 transition-transform">
                   <Building2 className="h-10 w-10" />
                 </div>
-                <h2 className="text-[22px] font-bold text-[#1e293b] mb-4 text-center">
+
+                <h2 className="text-[22px] font-bold text-[#1e293b] mb-4 text-center group-hover:text-[#8dc63f] transition-colors">
                   {sede.nombre}
                 </h2>
-                <div className="flex items-center text-[#8dc63f] text-sm mb-2">
+
+                <div className="flex items-center text-[#8dc63f] text-sm mb-2 font-medium">
                   <MapPin className="h-4 w-4 mr-2" />
                   {sede.ubicacion}
                 </div>
+
                 <p className="text-[#94a3b8] text-sm font-medium">
                   {sede.areas.length} áreas disponibles
                 </p>
@@ -45,8 +50,7 @@ export default function Home() {
         })}
       </div>
 
-      {/* LOGO CORPORATIVO (SIN EFECTOS Y MÁS GRANDE) */}
-      {/* mt-auto empuja el logo hacia abajo para que quede justo arriba del footer centrado */}
+      {/* Logo Corporativo centrado */}
       <div className="mt-auto pt-16 flex justify-center w-full">
         <img 
           src="/logo-grupo-palmas.png" 

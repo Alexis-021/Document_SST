@@ -3,12 +3,13 @@ module.exports = {
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./lib/**/*.{js,ts,jsx,tsx,mdx}", // INDISPENSABLE para detectar iconos en DATA_SEDES
   ],
   theme: {
     extend: {
       colors: {
-        // El azul corporativo que usa Alexis
-        brand: "#0066ff",
+        // Actualizamos al color institucional de Grupo Palmas
+        brand: "#8dc63f", 
       }
     },
   },
