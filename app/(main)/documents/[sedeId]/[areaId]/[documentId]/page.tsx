@@ -16,7 +16,7 @@ export default function DocumentModalPage({
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const [baseUrl, setBaseUrl] = useState("");
 
-  // 1. Detectar dispositivo y obtener la URL base para Office Online
+  // 1. Detectar dispositivo y obtener la URL base
   useEffect(() => {
     setBaseUrl(window.location.origin);
     const detectDevice = () => {
@@ -37,14 +37,19 @@ export default function DocumentModalPage({
 
   if (!docData) return null;
 
-  // 2. Lógica de rutas y extensiones
   const nombreArchivo = docData.nombre;
   const rutaArchivoLocal = `/docs/${nombreArchivo}`;
   const esPDF = nombreArchivo.toLowerCase().endsWith('.pdf');
   
-  // URL absoluta necesaria para el visor de Microsoft Office Online
+  // URL absoluta para el visor de Microsoft Office Online
   const urlPublicaCompleta = `${baseUrl}${rutaArchivoLocal}`;
   const urlOfficeViewer = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(urlPublicaCompleta)}`;
+
+  // MEJORA: Función de cierre forzado para evitar problemas de historial con iFrames
+  const handleClose = () => {
+    // Usamos push a la ruta padre para cerrar el modal de forma limpia al primer clic
+    router.push(`/documents/${sedeId}/${areaId}`);
+  };
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-0 md:p-6">
@@ -73,18 +78,21 @@ export default function DocumentModalPage({
             <a href={rutaArchivoLocal} download className="p-2.5 bg-slate-100 rounded-xl md:px-4 md:py-2 md:text-xs font-bold flex items-center gap-x-2 text-slate-700 hover:bg-slate-200 transition-colors">
               <Download className="h-4 w-4" /> <span className="hidden md:inline">Descargar</span>
             </a>
-            <button onClick={() => router.back()} className="p-2.5 hover:bg-red-50 rounded-xl text-slate-400 transition-colors">
+            {/* Botón de cierre actualizado */}
+            <button 
+              onClick={handleClose} 
+              className="p-2.5 hover:bg-red-50 rounded-xl text-slate-400 transition-colors"
+            >
               <X className="h-6 w-6" />
             </button>
           </div>
         </header>
 
-        {/* CONTENEDOR DINÁMICO MULTI-FORMATO */}
+        {/* CONTENEDOR DINÁMICO */}
         <div className="flex-1 bg-[#525659] relative overflow-hidden">
           {isMobile === null ? (
             <div className="h-full flex items-center justify-center text-white">Cargando visor...</div>
           ) : esPDF ? (
-            /* LÓGICA PARA PDF (ADAPTATIVA) */
             isMobile ? (
               <div className="h-full bg-white overflow-y-auto">
                 <DocViewer 
