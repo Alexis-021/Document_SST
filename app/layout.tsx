@@ -1,5 +1,6 @@
 import "./globals.css"; 
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react"; // 1. Importación necesaria
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -47,6 +48,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </footer>
         </div>
+        
+        {/* 2. Componente de Analíticas inyectado antes del cierre del body */}
+        <Analytics /> 
       </body>
     </html>
   );
