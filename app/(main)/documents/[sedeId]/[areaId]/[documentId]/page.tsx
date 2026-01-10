@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { X, Download, FileText, Smartphone, Monitor, FileCode } from "lucide-react";
+import { X, Download, FileText, Smartphone, Monitor, FileCode, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { DATA_SEDES } from "@/lib/data";
 import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
@@ -14,12 +14,15 @@ export default function DocumentModalPage({
   const router = useRouter();
   const { sedeId, areaId, documentId } = use(params);
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
-  const [baseUrl, setBaseUrl] = useState("");
+  const [baseUrl, setBaseUrl] = useState<string | null>(null); // Iniciamos como null
 
   useEffect(() => {
-    // Captura el origen actual (localhost o dominio de Vercel)
-    setBaseUrl(window.location.origin);
+    // 1. Detectar el dominio (Ej: https://mi-proyecto.vercel.app)
+    if (typeof window !== 'undefined') {
+      setBaseUrl(window.location.origin);
+    }
     
+    // 2. Detectar móvil
     const detectDevice = () => {
       const ua = navigator.userAgent.toLowerCase();
       const mobileKeywords = [/android/, /iphone/, /ipad/, /ipod/, /blackberry/, /windows phone/];
@@ -32,7 +35,7 @@ export default function DocumentModalPage({
     return () => window.removeEventListener('resize', detectDevice);
   }, []);
 
-  // Normalización para encontrar el área aunque la URL tenga guiones o no tenga tildes
+  // Lógica de búsqueda de datos
   const sede = DATA_SEDES[sedeId];
   const area = sede?.areas.find((a: any) => {
     const nombreNormalizado = a.nombre.toLowerCase()
@@ -46,11 +49,12 @@ export default function DocumentModalPage({
   if (!docData) return null;
 
   const nombreArchivo = docData.nombre;
-  const rutaArchivoLocal = `/docs/${nombreArchivo}`;
+  // encodeURIComponent en el nombre del archivo maneja espacios y caracteres especiales
+  const rutaArchivoLocal = `/docs/${encodeURIComponent(nombreArchivo)}`;
   const esPDF = nombreArchivo.toLowerCase().endsWith('.pdf');
   
-  // URL completa necesaria para que Microsoft Office Online pueda "halar" el archivo
-  const urlPublicaCompleta = `${baseUrl}${rutaArchivoLocal}`;
+  // Construcción de URLs (Solo si baseUrl existe)
+  const urlPublicaCompleta = baseUrl ? `${baseUrl}/docs/${nombreArchivo}` : "";
   const urlOfficeViewer = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(urlPublicaCompleta)}`;
 
   const handleClose = () => {
@@ -61,6 +65,7 @@ export default function DocumentModalPage({
     <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-0 md:p-6">
       <div className="bg-[#f3f3f3] w-full h-full md:max-h-[98vh] md:rounded-xl overflow-hidden flex flex-col shadow-2xl animate-in fade-in duration-200">
         
+        {/* HEADER */}
         <header className="bg-white border-b border-slate-200 px-4 md:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-x-3">
             <div className="bg-blue-50 p-2 rounded-lg hidden md:block">
@@ -80,7 +85,7 @@ export default function DocumentModalPage({
           </div>
 
           <div className="flex items-center gap-x-2">
-            <a href={rutaArchivoLocal} download className="p-2.5 bg-slate-100 rounded-xl md:px-4 md:py-2 md:text-xs font-bold flex items-center gap-x-2 text-slate-700 hover:bg-slate-200 transition-colors">
+            <a href={`/docs/${docData.nombre}`} download className="p-2.5 bg-slate-100 rounded-xl md:px-4 md:py-2 md:text-xs font-bold flex items-center gap-x-2 text-slate-700 hover:bg-slate-200 transition-colors">
               <Download className="h-4 w-4" /> <span className="hidden md:inline">Descargar</span>
             </a>
             <button 
@@ -92,35 +97,46 @@ export default function DocumentModalPage({
           </div>
         </header>
 
-        <div className="flex-1 bg-[#525659] relative overflow-hidden">
-          {isMobile === null ? (
-            <div className="h-full flex items-center justify-center text-white">Preparando visor...</div>
+        {/* VISOR PRINCIPAL */}
+        <div className="flex-1 bg-[#525659] relative overflow-hidden flex items-center justify-center">
+          
+          {/* Si no tenemos baseUrl aún, mostramos carga */}
+          {!baseUrl ? (
+             <div className="flex flex-col items-center gap-3 text-white">
+               <Loader2 className="h-8 w-8 animate-spin text-[#8dc63f]" />
+               <span className="text-sm font-medium">Conectando visor...</span>
+             </div>
           ) : esPDF ? (
+            // LOGICA PDF
             isMobile ? (
-              <div className="h-full bg-white overflow-y-auto">
+              <div className="w-full h-full bg-white overflow-y-auto">
                 <DocViewer 
-                  documents={[{ uri: rutaArchivoLocal }]} 
+                  documents={[{ uri: `/docs/${docData.nombre}` }]} 
                   pluginRenderers={DocViewerRenderers}
                   style={{ height: "100%" }}
-                  config={{
-                    header: { disableHeader: true },
-                    pdfVerticalScrollByDefault: true,
-                  }}
+                  config={{ header: { disableHeader: true }, pdfVerticalScrollByDefault: true }}
                 />
               </div>
             ) : (
-              <iframe src={rutaArchivoLocal} className="w-full h-full border-none bg-white" />
+              <iframe src={`/docs/${encodeURIComponent(docData.nombre)}`} className="w-full h-full border-none bg-white" />
             )
           ) : (
+            // LOGICA OFFICE (WORD/EXCEL)
             <div className="w-full h-full bg-white">
+              {/* key={urlOfficeViewer} obliga a React a reiniciar el iframe si la URL cambia */}
               <iframe 
+                key={urlOfficeViewer}
                 src={urlOfficeViewer}
                 width="100%"
                 height="100%"
                 className="w-full h-full border-none"
                 title="Office Document Viewer"
+                onError={(e) => console.error("Error cargando iframe de Office", e)}
               >
-                Tu navegador no soporta iframes. <a href={rutaArchivoLocal}>Descargar archivo</a>.
+                <div className="p-10 text-center">
+                  <p>Tu navegador no soporta la visualización directa.</p>
+                  <a href={`/docs/${docData.nombre}`} className="text-blue-600 underline">Descargar archivo</a>
+                </div>
               </iframe>
             </div>
           )}
