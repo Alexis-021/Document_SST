@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { 
   FileText, Download, Eye, Search, ChevronRight, Home, 
-  Calendar, HardDrive, FileCode 
+  HardDrive, FileSpreadsheet, FileType, File
 } from "lucide-react";
 
 export default function AreaClientPage({ sedeId, areaId, areaNombre, archivos }: any) {
@@ -12,7 +12,7 @@ export default function AreaClientPage({ sedeId, areaId, areaNombre, archivos }:
   const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState<Record<string, { views: number, downloads: number }>>({});
 
-  // 1. FUNCIÓN PARA CARGAR ESTADÍSTICAS (Memorizada para evitar re-renderizados)
+  // 1. CARGA DE ESTADÍSTICAS
   const fetchStats = useCallback(async () => {
     try {
       const response = await fetch('/api/stats/get-all');
@@ -20,23 +20,18 @@ export default function AreaClientPage({ sedeId, areaId, areaNombre, archivos }:
       const data = await response.json();
       setStats(data);
     } catch (error) {
-      console.error("Error cargando estadísticas de Neon:", error);
+      console.error("Error cargando estadísticas:", error);
     }
   }, []);
 
-  // 2. EFECTO DE CARGA INICIAL Y RE-SINCRONIZACIÓN AL VOLVER
   useEffect(() => {
     fetchStats();
-
-    // Refresca los datos automáticamente cuando el usuario cierra el modal y vuelve a la lista
     window.addEventListener('focus', fetchStats);
     return () => window.removeEventListener('focus', fetchStats);
   }, [fetchStats]);
 
-  // 3. REGISTRAR CLIC EN LA BASE DE DATOS NEON
   const registrarAccion = async (docId: string, action: 'view' | 'download') => {
     try {
-      // Actualización visual inmediata (Optimistic UI) para que el usuario vea el cambio al instante
       setStats(prev => ({
         ...prev,
         [docId]: {
@@ -44,18 +39,16 @@ export default function AreaClientPage({ sedeId, areaId, areaNombre, archivos }:
           downloads: (prev[docId]?.downloads || 0) + (action === 'download' ? 1 : 0),
         }
       }));
-
       await fetch('/api/stats', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ documentId: docId, action }),
       });
-    } catch (error) {
-      console.error("Error al registrar en la base de datos:", error);
-    }
+    } catch (error) { console.error(error); }
   };
 
-  const filtros = ["Todos", "Procedimientos", "Matriz IPERC", "Políticas", "Instructivos", "Formatos", "Registros","Reglamentos"];
+  // 2. LÓGICA DE FILTROS Y PROCESAMIENTO
+  const filtros = ["Todos", "Procedimientos", "Matriz IPERC", "Políticas", "Instructivos", "Formatos", "Registros", "Reglamentos"];
   const sedeNombreFormateado = sedeId.replace(/-/g, ' ');
 
   const counts = useMemo(() => {
@@ -74,16 +67,39 @@ export default function AreaClientPage({ sedeId, areaId, areaNombre, archivos }:
     });
   }, [activeFilter, searchQuery, archivos]);
 
+  // A) Limpia el nombre para el título principal
   const limpiarNombre = (nombreCompleto: string) => {
-    return nombreCompleto.substring(0, nombreCompleto.lastIndexOf('.')) || nombreCompleto;
+    return nombreCompleto.replace(/\.[^/.]+$/, ""); 
+  };
+
+  // B) Obtiene la extensión para la etiqueta (BADGE)
+  const obtenerExtension = (nombre: string) => {
+    return nombre.split('.').pop()?.toUpperCase() || 'FILE';
+  };
+
+  // C) Asigna color a la etiqueta según el tipo
+  const getClassPorExtension = (ext: string) => {
+    if (['XLS', 'XLSX', 'CSV'].includes(ext)) return "bg-green-100 text-green-700 border-green-200"; // Excel
+    if (['DOC', 'DOCX'].includes(ext)) return "bg-blue-100 text-blue-700 border-blue-200"; // Word
+    if (['PDF'].includes(ext)) return "bg-red-100 text-red-700 border-red-200"; // PDF
+    return "bg-slate-100 text-slate-500 border-slate-200"; // Otros
+  };
+
+  // D) Asigna icono grande
+  const getFileIcon = (fileName: string) => {
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    if (['xlsx', 'xls', 'csv'].includes(ext || '')) return <FileSpreadsheet className="h-6 w-6 text-green-600" />;
+    if (['doc', 'docx'].includes(ext || '')) return <FileType className="h-6 w-6 text-blue-600" />;
+    if (ext === 'pdf') return <FileText className="h-6 w-6 text-red-500" />;
+    return <File className="h-6 w-6 text-slate-400" />;
   };
 
   return (
     <div className="w-full min-h-full bg-[#f8fafc] p-4 md:p-10 font-sans">
+      {/* NAVEGACIÓN */}
       <nav className="flex items-center gap-x-2 text-[11px] md:text-xs font-medium mb-8 overflow-x-auto whitespace-nowrap pb-2">
         <Link href="/" className="flex items-center gap-1 text-slate-400 hover:text-[#8dc63f] transition-all">
-          <Home className="h-3.5 w-3.5" />
-          <span>Sedes</span>
+          <Home className="h-3.5 w-3.5" /><span>Sedes</span>
         </Link>
         <ChevronRight className="h-3 w-3 text-slate-300" />
         <Link href={`/documents/${sedeId}`} className="text-slate-400 hover:text-[#8dc63f] transition-all capitalize">
@@ -95,22 +111,23 @@ export default function AreaClientPage({ sedeId, areaId, areaNombre, archivos }:
         </span>
       </nav>
 
+      {/* HEADER */}
       <div className="mb-10">
         <h1 className="text-3xl md:text-4xl font-bold text-[#1e293b] mb-2">{areaNombre}</h1>
         <p className="text-slate-500">Documentación oficial de Grupo Palmas</p>
       </div>
 
+      {/* BUSCADOR */}
       <div className="relative mb-8">
         <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
         <input 
-          type="text"
-          placeholder="Buscar documentos..."
+          type="text" placeholder="Buscar documentos..."
           className="w-full pl-14 pr-6 py-4 bg-white border border-slate-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#8dc63f]/20 transition-all font-medium text-slate-700"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
+      {/* FILTROS TABS */}
       <div className="flex flex-wrap gap-2 mb-10">
         {filtros.map((f) => {
           const c = counts[f] || 0;
@@ -126,42 +143,64 @@ export default function AreaClientPage({ sedeId, areaId, areaNombre, archivos }:
         })}
       </div>
 
+      {/* LISTA DE ARCHIVOS */}
       <div className="grid gap-4 w-full pb-20">
         {archivosFiltrados.map((doc: any) => {
           const docStats = stats[doc.id] || { views: 0, downloads: 0 };
+          const extension = obtenerExtension(doc.nombre);
+          
           return (
             <div key={doc.id} className="bg-white border border-slate-100 rounded-[24px] p-5 flex flex-col lg:flex-row lg:items-center justify-between group hover:border-[#8dc63f] hover:shadow-md transition-all">
               <div className="flex items-center gap-x-5">
-                <div className="p-4 bg-slate-50 text-slate-400 rounded-2xl group-hover:bg-[#8dc63f] group-hover:text-white transition-all shadow-inner">
-                  <FileText className="h-6 w-6" />
+                {/* ICONO GRANDE */}
+                <div className="p-4 bg-slate-50 rounded-2xl group-hover:bg-slate-100 transition-all shadow-inner">
+                  {getFileIcon(doc.nombre)}
                 </div>
+                
                 <div>
+                  {/* TÍTULO LIMPIO (Sin extensión) */}
                   <h3 className="text-lg font-bold text-[#1e293b] group-hover:text-[#8dc63f] transition-colors leading-tight">
                     {limpiarNombre(doc.nombre)}
                   </h3>
-                  <div className="flex flex-wrap items-center gap-4 mt-1">
+                  
+                  {/* ZONA DE METADATA CON ETIQUETAS */}
+                  <div className="flex flex-wrap items-center gap-3 mt-2">
+                    
+                    {/* 1. Categoría */}
                     <span className="text-[10px] font-bold text-[#8dc63f] uppercase bg-[#8dc63f]/10 px-2 py-0.5 rounded border border-[#8dc63f]/10">
                       {doc.categoria}
                     </span>
-                    <div className="flex items-center gap-1.5 text-slate-400 text-xs font-medium">
-                      <HardDrive className="h-3.5 w-3.5" /> <span>{doc.peso}</span>
+
+                    {/* 2. ETIQUETA DE EXTENSIÓN (PDF/XLSX) - RESTAURADA */}
+                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${getClassPorExtension(extension)}`}>
+                      {extension}
+                    </span>
+
+                    {/* 3. Separador */}
+                    <div className="w-px h-3 bg-slate-300 mx-1"></div>
+
+                    {/* 4. Peso del archivo */}
+                    <div className="flex items-center gap-1 text-slate-400 text-xs font-medium">
+                      <HardDrive className="h-3 w-3" /> <span>{doc.peso}</span>
                     </div>
                     
-                    {/* INDICADORES DE VISTAS Y DESCARGAS DESDE NEON */}
-                    <div className="flex items-center gap-3 border-l border-slate-200 pl-4 ml-1">
-                      <div className="flex items-center gap-1.5 text-slate-500 text-[11px] font-bold">
-                        <Eye className="h-3.5 w-3.5 text-blue-500" />
+                    {/* 5. Estadísticas de Neon */}
+                    <div className="flex items-center gap-3 pl-2">
+                      <div className="flex items-center gap-1 text-slate-500 text-[11px] font-bold" title="Vistas">
+                        <Eye className="h-3 w-3 text-blue-500" />
                         <span>{docStats.views}</span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-slate-500 text-[11px] font-bold">
-                        <Download className="h-3.5 w-3.5 text-green-600" />
+                      <div className="flex items-center gap-1 text-slate-500 text-[11px] font-bold" title="Descargas">
+                        <Download className="h-3 w-3 text-green-600" />
                         <span>{docStats.downloads}</span>
                       </div>
                     </div>
+
                   </div>
                 </div>
               </div>
 
+              {/* BOTONES */}
               <div className="flex items-center gap-x-3 mt-6 lg:mt-0">
                 <Link 
                   href={`/documents/${sedeId}/${areaId}/${doc.id}`} 

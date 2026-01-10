@@ -1,9 +1,17 @@
-import "./globals.css"; 
+import "./globals.css";
+import type { Metadata } from "next"; // 1. Importamos el tipo Metadata
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next"; // Nueva importación
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({ subsets: ["latin"] });
+
+// 2. Aquí definimos el título y el ícono de la pestaña
+export const metadata: Metadata = {
+  title: "SST Palmas - Gestión Documental",
+  description: "Plataforma de gestión de documentos de seguridad y salud en el trabajo",
+
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -22,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <footer className="shrink-0 bg-white border-t border-slate-200 py-6 z-50">
             <div className="w-full px-6 relative flex items-center justify-center min-h-[40px]">
               
-              {/* LOGO */}
+              {/* LOGO FOOTER */}
               <div className="absolute left-6">
                 <img 
                   src="/logo-grupo-palmas.png" 
